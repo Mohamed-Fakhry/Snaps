@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".motionviews.ui.MainActivity">
+
+    <com.example.computec.testfirrebase.motionviews.widget.LockableScrollView
+        android:id="@+id/scrollV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frameL"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/profileIV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/profile" />
+
+                <com.example.computec.testfirrebase.motionviews.widget.MotionView
+                    android:id="@+id/main_motion_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+            <!--    Todo add stickers  -->
+        </LinearLayout>
+    </com.example.computec.testfirrebase.motionviews.widget.LockableScrollView>
+
+    <RelativeLayout
+        android:id="@+id/toolsL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/changeFontIV"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="24dp"
+            android:layout_toStartOf="@+id/addStickerIV"
+            android:src="@drawable/ic_change_font"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/addStickerIV"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="24dp"
+            android:layout_toStartOf="@+id/addTextIV"
+            android:src="@drawable/ic_faces_24dp" />
+
+        <ImageView
+            android:id="@+id/addTextIV"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="24dp"
+            android:layout_toStartOf="@+id/addFilterIV"
+            android:src="@drawable/ic_text_fields_24dp" />
+
+        <ImageView
+            android:id="@+id/addFilterIV"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_edit_24dp" />
+
+        <ImageView
+            android:id="@+id/deleteIV"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_delete_white"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/filterV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolsL"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Swipe To Change Filter"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/md_white" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/completeFAB"-->
+        <!--android:layout_width="62dp"-->
+        <!--android:layout_height="62dp"-->
+        <!--android:layout_gravity="end"-->
+        <!--android:layout_marginBottom="16dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:background="@color/colorAccent"-->
+        <!--android:src="@drawable/ic_send_24dp" />-->
+
+        <com.example.computec.testfirrebase.motionviews.color.SpectrumPalette
+            android:id="@+id/palette"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:spectrum_autoPadding="true"
+            app:spectrum_colors="@array/demo_colors"
+            app:spectrum_columnCount="7"
+            app:spectrum_outlineWidth="1dp" />
+
+        <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:id="@+id/filterRV"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="100dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:visibility="gone" />-->
+
+        <EditText
+            android:id="@+id/createET"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_creat_text"
+            android:hint="Snap"
+            android:imeOptions="actionDone"
+            android:padding="8dp"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="16dp">
+
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/publicB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/rounded_corner_selected"
+                android:padding="8dp"
+                android:text="Publish Public"
+                android:textColor="#ffffff"
+                android:textSize="16sp" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/privateB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/rounded_corner_selected"
+                android:padding="8dp"
+                android:text="Publish Private"
+                android:textColor="#ffffff"
+                android:textSize="16sp" />
+
+            <android.support.v4.widget.Space
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
