@@ -9,11 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme360">
-        <activity android:name=".FirebaseActivity" />
         <activity
             android:name=".motionviews.ui.MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/FullScreen"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".motionviews.ui.StickerSelectActivity"
@@ -22,10 +20,6 @@
             android:name=".motionviews.ui.snap.SnapsActivity"
             android:label="@string/title_activity_main2"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name=".SportLifeActivtity"
-            android:label="@string/title_activity_sport_life_activtity"
-            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".motionviews.ui.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullScreen">

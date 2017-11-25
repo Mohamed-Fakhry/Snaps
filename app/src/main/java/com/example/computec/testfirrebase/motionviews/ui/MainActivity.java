@@ -130,9 +130,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         ButterKnife.bind(this);
         this.fontProvider = new FontProvider(getResources());
 
@@ -293,12 +290,16 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
             motionView.deletedSelectedEntity();
         deleteIV.setVisibility(View.GONE);
         spectrumPalette.setVisibility(View.GONE);
+        changeFontIV.setVisibility(View.GONE);
     }
 
     private void startTextEntityEditing() {
 
         try {
             final TextEntity textEntity = currentTextEntity();
+            spectrumPalette.setVisibility(View.GONE);
+            filterV.setVisibility(View.GONE);
+            createET.setVisibility(View.VISIBLE);
 
             final PointF oldPostion = textEntity.absoluteCenter();
             currentP = oldPostion;
@@ -309,9 +310,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
 
             createET.setText(textEntity.getLayer().getText());
             createET.setSelection(createET.getText().length());
-            spectrumPalette.setVisibility(View.GONE);
-            filterV.setVisibility(View.GONE);
-            createET.setVisibility(View.VISIBLE);
             createET.setSingleLine();
 
             createET.setImeOptions(EditorInfo.IME_ACTION_DONE);
@@ -355,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
 
     @OnClick(R.id.addTextIV)
     protected void addTextSticker() {
+        createET.setText("");
         spectrumPalette.setVisibility(View.GONE);
         filterV.setVisibility(View.GONE);
         createET.setVisibility(View.VISIBLE);
@@ -606,12 +605,10 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
 
     @Override
     public void onEntityDoubleTap(@NonNull MotionEntity entity) {
-
-        startTextEntityEditing();
-
         if (entity instanceof TextEntity && spectrumPalette.getVisibility() != View.VISIBLE) {
             filterV.setVisibility(View.GONE);
         }
+        startTextEntityEditing();
     }
 
     @Override
