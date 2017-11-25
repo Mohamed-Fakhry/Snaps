@@ -26,10 +26,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -82,8 +82,8 @@ import butterknife.OnClick;
 
 import static com.yalantis.ucrop.util.BitmapLoadUtils.calculateInSampleSize;
 
-public class MainActivity extends AppCompatActivity implements TextEditorDialogFragment.OnTextLayerCallback,
-        ThumbnailCallback, MotionView.MotionViewCallback, SpectrumPalette.OnColorSelectedListener {
+public class MainActivity extends AppCompatActivity implements TextEditorDialogFragment.OnTextLayerCallback
+        , MotionView.MotionViewCallback, SpectrumPalette.OnColorSelectedListener {
 
     static {
         System.loadLibrary("NativeImageProcessor");
@@ -111,13 +111,16 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
     @BindView(R.id.changeFontIV)
     ImageView changeFontIV;
 
+    User user;
+
+    TextEntity textEntity;
+    boolean editing;
     private FontProvider fontProvider;
+    PointF currentP;
+    OnSwipeTouchListener onSwipeTouchListener;
     StorageReference mStorageRef;
     DatabaseReference myRef;
-    PointF currentP;
     ArrayList<ThumbnailItem> thumbs = new ArrayList<>();
-    OnSwipeTouchListener onSwipeTouchListener;
-    User user;
 
     public static Intent newInstance(Context context, String path) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -171,6 +174,21 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         filterV.setOnTouchListener(onSwipeTouchListener);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_STICKER_REQUEST_CODE) {
+                if (data != null) {
+                    int stickerId = data.getIntExtra(StickerSelectActivity.EXTRA_STICKER_ID, 0);
+                    if (stickerId != 0) {
+                        addSticker(stickerId);
+                    }
+                }
+            }
+        }
+    }
+
     @OnClick({R.id.privateB, R.id.publicB})
     public void completePreview() {
         ProgressDialog dialog = new ProgressDialog(MainActivity.this);
@@ -201,13 +219,9 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 myRef.child("sport_life").child("public")
                         .child("snap")
                         .push().setValue(snap);
-                start();
+                finish();
             }
         });
-    }
-
-    private void start() {
-        finish();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -223,8 +237,7 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void bindDataToAdapter() {
-        final Context context = this;
+    private void prepareFilterList() {
         Handler handler = new Handler();
         Runnable r = new Runnable() {
             public void run() {
@@ -237,9 +250,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 thumbs.add(getThumbnailItem(bitmap, SampleFilters.getAweStruckVibeFilter()));
                 thumbs.add(getThumbnailItem(bitmap, SampleFilters.getLimeStutterFilter()));
                 thumbs.add(getThumbnailItem(bitmap, SampleFilters.getNightWhisperFilter()));
-
-                ThumbnailsAdapter adapter = new ThumbnailsAdapter(thumbs, (ThumbnailCallback) context);
-                adapter.notifyDataSetChanged();
             }
         };
         handler.post(r);
@@ -251,6 +261,13 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         Bitmap thumbImage1 = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), false);
         thumbnailItem = new ThumbnailItem(thumbImage1, filter);
         return thumbnailItem;
+    }
+
+    @OnClick(R.id.addStickerIV)
+    public void addSticker() {
+        if (editing) editDone(textEntity);
+        Intent intent = new Intent(this, StickerSelectActivity.class);
+        startActivityForResult(intent, SELECT_STICKER_REQUEST_CODE);
     }
 
     private void addSticker(final int stickerResId) {
@@ -267,14 +284,9 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         });
     }
 
-    @OnClick(R.id.addStickerIV)
-    public void addSticker() {
-        Intent intent = new Intent(this, StickerSelectActivity.class);
-        startActivityForResult(intent, SELECT_STICKER_REQUEST_CODE);
-    }
-
     @OnClick(R.id.addFilterIV)
     public void addFilterIV() {
+        if (editing) editDone(textEntity);
         if (filterV.getVisibility() == View.GONE) {
             filterV.setVisibility(View.VISIBLE);
             motionView.unselectEntity();
@@ -283,26 +295,32 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
             filterV.setVisibility(View.GONE);
     }
 
-    @OnClick(R.id.deleteIV)
-    public void deleteEntity() {
-        MotionEntity entity = motionView.getSelectedEntity();
-        if (entity != null)
-            motionView.deletedSelectedEntity();
-        deleteIV.setVisibility(View.GONE);
-        spectrumPalette.setVisibility(View.GONE);
-        changeFontIV.setVisibility(View.GONE);
+    @OnClick(R.id.addTextIV)
+    protected void addTextSticker() {
+        if (editing) editDone(textEntity);
+        TextLayer textLayer = createTextLayer("");
+        TextEntity textEntity = new TextEntity(textLayer, motionView.getWidth(),
+                motionView.getHeight(), fontProvider);
+        textEntity.setColor(ResourcesCompat.getColor(getResources(), R.color.color_6, null));
+
+        motionView.addEntityAndPosition(textEntity);
+
+        // redraw
+        createET.setText("");
+        startTextEntityEditing(textEntity);
     }
 
-    private void startTextEntityEditing() {
+    private void startTextEntityEditing(final TextEntity textEntity) {
 
         try {
-            final TextEntity textEntity = currentTextEntity();
+            this.textEntity = textEntity;
+            editing = true;
             spectrumPalette.setVisibility(View.GONE);
             filterV.setVisibility(View.GONE);
             createET.setVisibility(View.VISIBLE);
 
-            final PointF oldPostion = textEntity.absoluteCenter();
-            currentP = oldPostion;
+            final PointF oldPosition = textEntity.absoluteCenter();
+            currentP = oldPosition;
             PointF center = textEntity.absoluteCenter();
             center.y = center.y * 100F;
             textEntity.moveCenterTo(center);
@@ -317,21 +335,14 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
             imm.showSoftInput(createET, InputMethodManager.SHOW_FORCED);
 
             createET.requestFocus();
+
             textEntity.moveCenterTo(center);
 
             createET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_DONE) {
-
-                        TextLayer textLayer = textEntity.getLayer();
-                        if (!v.getText().toString().equals(textLayer.getText())) {
-                            textLayer.setText(v.getText().toString());
-                            textEntity.updateEntity();
-                            motionView.invalidate();
-                        }
-                        textEntity.moveCenterTo(oldPostion);
-                        v.setVisibility(View.GONE);
+                    if (actionId == EditorInfo.IME_ACTION_DONE && editing) {
+                        editDone(textEntity);
                     }
                     return false;
                 }
@@ -342,52 +353,42 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         }
     }
 
-    @Nullable
-    private TextEntity currentTextEntity() {
-        if (motionView != null && motionView.getSelectedEntity() instanceof TextEntity) {
-            return ((TextEntity) motionView.getSelectedEntity());
-        } else {
-            return null;
+    private void editDone(TextEntity textEntity) {
+        TextView v = createET;
+        PointF oldPosition = currentP;
+        TextLayer textLayer = textEntity.getLayer();
+        if (!v.getText().toString().equals(textLayer.getText())) {
+            textLayer.setText(v.getText().toString());
+            textEntity.updateEntity();
+            textEntity.moveCenterTo(oldPosition);
+            motionView.invalidate();
         }
+        if (TextUtils.isEmpty(v.getText().toString())) {
+            motionView.deletedSelectedEntity();
+            motionView.invalidate();
+        }
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(createET.getWindowToken(), 0);
+        v.setVisibility(View.GONE);
+        editing = false;
     }
 
-    @OnClick(R.id.addTextIV)
-    protected void addTextSticker() {
-        createET.setText("");
-        spectrumPalette.setVisibility(View.GONE);
-        filterV.setVisibility(View.GONE);
-        createET.setVisibility(View.VISIBLE);
-        createET.requestFocus();
-        createET.setSingleLine();
-        createET.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        final InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(createET, InputMethodManager.SHOW_FORCED);
-
-        createET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if (v.getText().toString() != null && !v.getText().toString().isEmpty()) {
-                        TextLayer textLayer = createTextLayer(v.getText().toString());
-                        TextEntity textEntity = new TextEntity(textLayer, motionView.getWidth(),
-                                motionView.getHeight(), fontProvider);
-                        textEntity.setColor(ResourcesCompat.getColor(getResources(), R.color.color_6, null));
-
-                        motionView.addEntityAndPosition(textEntity);
-
-                        // redraw
-                        motionView.invalidate();
-                        v.setVisibility(View.GONE);
-                        v.setText("");
-                    }
-                }
-                return false;
+    @Override
+    public void textChanged(@NonNull String text) {
+        TextEntity textEntity = currentTextEntity();
+        if (textEntity != null) {
+            TextLayer textLayer = textEntity.getLayer();
+            if (!text.equals(textLayer.getText())) {
+                textLayer.setText(text);
+                textEntity.updateEntity();
+                motionView.invalidate();
             }
-        });
+        }
     }
 
     @OnClick(R.id.changeFontIV)
     public void changeTextEntityFont() {
+        if (editing) editDone(textEntity);
         final List<String> fonts = fontProvider.getFontNames();
         FontsAdapter fontsAdapter = new FontsAdapter(this, fonts, fontProvider);
         new AlertDialog.Builder(this)
@@ -406,6 +407,26 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 .show();
     }
 
+    @Nullable
+    private TextEntity currentTextEntity() {
+        if (motionView != null && motionView.getSelectedEntity() instanceof TextEntity) {
+            return ((TextEntity) motionView.getSelectedEntity());
+        } else {
+            return null;
+        }
+    }
+
+    @OnClick(R.id.deleteIV)
+    public void deleteEntity() {
+        if (editing) editDone(textEntity);
+        MotionEntity entity = motionView.getSelectedEntity();
+        if (entity != null)
+            motionView.deletedSelectedEntity();
+        deleteIV.setVisibility(View.GONE);
+        spectrumPalette.setVisibility(View.GONE);
+        changeFontIV.setVisibility(View.GONE);
+    }
+
     private TextLayer createTextLayer(String message) {
         TextLayer textLayer = new TextLayer();
         Font font = new Font();
@@ -422,31 +443,45 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == SELECT_STICKER_REQUEST_CODE) {
-                if (data != null) {
-                    int stickerId = data.getIntExtra(StickerSelectActivity.EXTRA_STICKER_ID, 0);
-                    if (stickerId != 0) {
-                        addSticker(stickerId);
-                    }
-                }
-            }
+    public void onEntitySelected(@Nullable MotionEntity entity) {
+        if (editing) editDone(textEntity);
+        if (entity instanceof TextEntity) {
+            deleteIV.setVisibility(View.VISIBLE);
+            spectrumPalette.setVisibility(View.VISIBLE);
+            filterV.setVisibility(View.GONE);
+            changeFontIV.setVisibility(View.VISIBLE);
+            spectrumPalette.setSelectedColor(((TextEntity) entity).getColor());
+        } else if (entity instanceof ImageEntity) {
+            deleteIV.setVisibility(View.VISIBLE);
+            spectrumPalette.setVisibility(View.GONE);
+            changeFontIV.setVisibility(View.GONE);
+        } else {
+            deleteIV.setVisibility(View.GONE);
+            spectrumPalette.setVisibility(View.GONE);
+            changeFontIV.setVisibility(View.GONE);
         }
     }
 
     @Override
-    public void textChanged(@NonNull String text) {
-        TextEntity textEntity = currentTextEntity();
-        if (textEntity != null) {
-            TextLayer textLayer = textEntity.getLayer();
-            if (!text.equals(textLayer.getText())) {
-                textLayer.setText(text);
-                textEntity.updateEntity();
-                motionView.invalidate();
-            }
+    public void onEntityDoubleTap(@NonNull MotionEntity entity) {
+        if (editing) editDone(textEntity);
+        if (entity instanceof TextEntity && spectrumPalette.getVisibility() != View.VISIBLE) {
+            filterV.setVisibility(View.GONE);
         }
+        startTextEntityEditing(textEntity);
+    }
+
+    @Override
+    public void onColorSelected(@ColorInt int color) {
+        TextEntity textEntity = currentTextEntity();
+        if (textEntity == null) {
+            return;
+        }
+        textEntity.getLayer().getFont().setColor(color);
+        textEntity.updateEntity();
+        motionView.invalidate();
+        textEntity.setIsSelected(true);
+        textEntity.setColor(color);
     }
 
     public Bitmap viewToBitmap(View view) {
@@ -470,9 +505,18 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         return cropBitmap;
     }
 
-    @Override
-    public void onThumbnailClick(Bitmap bitmap) {
-        profileIV.setImageBitmap(bitmap);
+    public void getCircularImage(final ImageView imageView, String imageUrl) {
+        final Context context = imageView.getContext();
+        Glide.with(context)
+                .load(imageUrl)
+                .asBitmap()
+                .into(new BitmapImageViewTarget(imageView) {
+                    @Override
+                    protected void setResource(Bitmap resource) {
+                        imageView.setImageBitmap(resource);
+                        prepareFilterList();
+                    }
+                });
     }
 
     public static String resizeAndCompressImageBeforeSend(Context context, String filePath, String fileName) {
@@ -570,62 +614,7 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         return bitmap;
     }
 
-    public void getCircularImage(final ImageView imageView, String imageUrl) {
-        final Context context = imageView.getContext();
-        Glide.with(context)
-                .load(imageUrl)
-                .asBitmap()
-                .into(new BitmapImageViewTarget(imageView) {
-                    @Override
-                    protected void setResource(Bitmap resource) {
-                        imageView.setImageBitmap(resource);
-                        bindDataToAdapter();
-                    }
-                });
-    }
-
-    @Override
-    public void onEntitySelected(@Nullable MotionEntity entity) {
-        if (entity instanceof TextEntity) {
-            deleteIV.setVisibility(View.VISIBLE);
-            spectrumPalette.setVisibility(View.VISIBLE);
-            filterV.setVisibility(View.GONE);
-            changeFontIV.setVisibility(View.VISIBLE);
-            spectrumPalette.setSelectedColor(((TextEntity) entity).getColor());
-        } else if (entity instanceof ImageEntity) {
-            deleteIV.setVisibility(View.VISIBLE);
-            spectrumPalette.setVisibility(View.GONE);
-            changeFontIV.setVisibility(View.GONE);
-        } else {
-            deleteIV.setVisibility(View.GONE);
-            spectrumPalette.setVisibility(View.GONE);
-            changeFontIV.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void onEntityDoubleTap(@NonNull MotionEntity entity) {
-        if (entity instanceof TextEntity && spectrumPalette.getVisibility() != View.VISIBLE) {
-            filterV.setVisibility(View.GONE);
-        }
-        startTextEntityEditing();
-    }
-
-    @Override
-    public void onColorSelected(@ColorInt int color) {
-        TextEntity textEntity = currentTextEntity();
-        if (textEntity == null) {
-            return;
-        }
-        textEntity.getLayer().getFont().setColor(color);
-        textEntity.updateEntity();
-        motionView.invalidate();
-        textEntity.setIsSelected(true);
-        textEntity.setColor(color);
-    }
-
     Bitmap saveImage() {
-
         requestPermissionsSafely(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
         if (hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {

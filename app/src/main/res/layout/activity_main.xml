@@ -99,7 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Swipe To Change Filter"
+            android:text="&lt;&lt; Swipe To Change Filter &gt;&gt;"
             android:textAlignment="center"
             android:textAllCaps="true"
             android:textColor="@color/md_white" />
