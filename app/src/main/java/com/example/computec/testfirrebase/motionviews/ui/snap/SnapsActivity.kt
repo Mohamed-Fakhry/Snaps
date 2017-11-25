@@ -5,12 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.widget.LinearLayout
-
 import com.example.computec.testfirrebase.R
 import com.example.computec.testfirrebase.SportLifeFeed
 import com.example.computec.testfirrebase.User
@@ -20,7 +17,6 @@ import com.google.firebase.storage.StorageReference
 import com.sandrios.sandriosCamera.internal.SandriosCamera
 import com.sandrios.sandriosCamera.internal.configuration.CameraConfiguration
 import kotlinx.android.synthetic.main.activity_snaps.*
-import kotlinx.android.synthetic.main.content_main2.*
 
 
 class SnapsActivity : AppCompatActivity() {

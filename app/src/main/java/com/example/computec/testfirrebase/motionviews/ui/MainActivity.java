@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -27,29 +26,21 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.example.computec.testfirrebase.BuildConfig;
 import com.example.computec.testfirrebase.R;
-import com.example.computec.testfirrebase.SportLifeActivtity;
 import com.example.computec.testfirrebase.SportLifeFeed;
 import com.example.computec.testfirrebase.User;
 import com.example.computec.testfirrebase.motionviews.color.SpectrumPalette;
@@ -107,8 +98,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
     MotionView motionView;
     @BindView(R.id.frameL)
     View imageLayout;
-//    @BindView(R.id.filterRV)
-//    RecyclerView filterRV;
     @BindView(R.id.profileIV)
     ImageView profileIV;
     @BindView(R.id.deleteIV)
@@ -164,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         user = new User("amrbarakat", "amr", 28, new Date());
         mStorageRef = FirebaseStorage.getInstance().getReference();
         myRef = FirebaseDatabase.getInstance().getReference();
-        initHorizontalList();
 
         onSwipeTouchListener = new OnSwipeTouchListener(this) {
             public void onSwipeRight() {
@@ -238,12 +226,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void initHorizontalList() {
-//        filterRV.setLayoutManager(new LinearLayoutManager(this,
-//                LinearLayoutManager.HORIZONTAL, false));
-//        filterRV.setHasFixedSize(true);
-    }
-
     private void bindDataToAdapter() {
         final Context context = this;
         Handler handler = new Handler();
@@ -260,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
                 thumbs.add(getThumbnailItem(bitmap, SampleFilters.getNightWhisperFilter()));
 
                 ThumbnailsAdapter adapter = new ThumbnailsAdapter(thumbs, (ThumbnailCallback) context);
-//                filterRV.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
             }
         };
@@ -329,7 +310,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
             createET.setText(textEntity.getLayer().getText());
             createET.setSelection(createET.getText().length());
             spectrumPalette.setVisibility(View.GONE);
-//        filterRV.setVisibility(View.GONE);
             filterV.setVisibility(View.GONE);
             createET.setVisibility(View.VISIBLE);
             createET.setSingleLine();
@@ -376,7 +356,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
     @OnClick(R.id.addTextIV)
     protected void addTextSticker() {
         spectrumPalette.setVisibility(View.GONE);
-//        filterRV.setVisibility(View.GONE);
         filterV.setVisibility(View.GONE);
         createET.setVisibility(View.VISIBLE);
         createET.requestFocus();
@@ -397,14 +376,9 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
 
                         motionView.addEntityAndPosition(textEntity);
 
-                        // move text sticker up so that its not hidden under keyboard
-//                        PointF center = textEntity.absoluteCenter();
-//                        center.y = center.y * 0.5F;
-//                        textEntity.moveCenterTo(center);
                         // redraw
                         motionView.invalidate();
                         v.setVisibility(View.GONE);
-//                        startTextEntityEditing();
                         v.setText("");
                     }
                 }
@@ -616,7 +590,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         if (entity instanceof TextEntity) {
             deleteIV.setVisibility(View.VISIBLE);
             spectrumPalette.setVisibility(View.VISIBLE);
-//            filterRV.setVisibility(View.GONE);
             filterV.setVisibility(View.GONE);
             changeFontIV.setVisibility(View.VISIBLE);
             spectrumPalette.setSelectedColor(((TextEntity) entity).getColor());
@@ -637,8 +610,6 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         startTextEntityEditing();
 
         if (entity instanceof TextEntity && spectrumPalette.getVisibility() != View.VISIBLE) {
-//            spectrumPalette.setVisibility(View.VISIBLE);
-//            filterRV.setVisibility(View.GONE);
             filterV.setVisibility(View.GONE);
         }
     }

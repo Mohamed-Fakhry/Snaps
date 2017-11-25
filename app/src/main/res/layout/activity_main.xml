@@ -113,16 +113,6 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/completeFAB"-->
-        <!--android:layout_width="62dp"-->
-        <!--android:layout_height="62dp"-->
-        <!--android:layout_gravity="end"-->
-        <!--android:layout_marginBottom="16dp"-->
-        <!--android:layout_marginEnd="8dp"-->
-        <!--android:background="@color/colorAccent"-->
-        <!--android:src="@drawable/ic_send_24dp" />-->
-
         <com.example.computec.testfirrebase.motionviews.color.SpectrumPalette
             android:id="@+id/palette"
             android:layout_width="wrap_content"
@@ -133,13 +123,6 @@
             app:spectrum_colors="@array/demo_colors"
             app:spectrum_columnCount="7"
             app:spectrum_outlineWidth="1dp" />
-
-        <!--<android.support.v7.widget.RecyclerView-->
-        <!--android:id="@+id/filterRV"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="100dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:visibility="gone" />-->
 
         <EditText
             android:id="@+id/createET"
@@ -196,5 +179,4 @@
                 android:layout_weight="1" />
         </LinearLayout>
     </LinearLayout>
-
 </RelativeLayout>
