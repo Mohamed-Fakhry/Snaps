@@ -7,22 +7,20 @@
     android:layout_height="match_parent"
     tools:context=".motionviews.ui.MainActivity">
 
-    <com.example.computec.testfirrebase.motionviews.widget.LockableScrollView
-        android:id="@+id/scrollV"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <com.example.computec.testfirrebase.motionviews.widget.LockableScrollView
+            android:id="@+id/scrollV"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:fillViewport="true">
 
             <FrameLayout
                 android:id="@+id/frameL"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1">
+                android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/profileIV"
@@ -35,9 +33,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
             </FrameLayout>
-            <!--    Todo add stickers  -->
-        </LinearLayout>
-    </com.example.computec.testfirrebase.motionviews.widget.LockableScrollView>
+        </com.example.computec.testfirrebase.motionviews.widget.LockableScrollView>
+        <!--    Todo add stickers  -->
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/toolsL"

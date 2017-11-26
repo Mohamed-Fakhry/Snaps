@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
 
     @OnClick(R.id.addTextIV)
     protected void addTextSticker() {
-        if (editing) editDone(textEntity);
+        if (editing) editDone(this.textEntity);
         TextLayer textLayer = createTextLayer("");
         TextEntity textEntity = new TextEntity(textLayer, motionView.getWidth(),
                 motionView.getHeight(), fontProvider);
@@ -318,6 +318,7 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
             spectrumPalette.setVisibility(View.GONE);
             filterV.setVisibility(View.GONE);
             createET.setVisibility(View.VISIBLE);
+            createET.setTextColor(textEntity.getColor());
 
             final PointF oldPosition = textEntity.absoluteCenter();
             currentP = oldPosition;
@@ -357,16 +358,15 @@ public class MainActivity extends AppCompatActivity implements TextEditorDialogF
         TextView v = createET;
         PointF oldPosition = currentP;
         TextLayer textLayer = textEntity.getLayer();
-        if (!v.getText().toString().equals(textLayer.getText())) {
-            textLayer.setText(v.getText().toString());
-            textEntity.updateEntity();
-            textEntity.moveCenterTo(oldPosition);
-            motionView.invalidate();
-        }
         if (TextUtils.isEmpty(v.getText().toString())) {
             motionView.deletedSelectedEntity();
             motionView.invalidate();
+            return;
         }
+        textLayer.setText(v.getText().toString());
+        textEntity.updateEntity();
+        textEntity.moveCenterTo(oldPosition);
+        motionView.invalidate();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(createET.getWindowToken(), 0);
         v.setVisibility(View.GONE);
